@@ -1,10 +1,6 @@
 #define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
 #include "KeyboardController.h"
-//FASTLED_USING_NAMESPACE
-#if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
-#warning "Requires FastLED 3.1 or later; check github for latest code."
-#endif
 
 #define DATA_PIN    6
 #define LED_TYPE    WS2811
