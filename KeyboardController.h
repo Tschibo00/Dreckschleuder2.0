@@ -1,3 +1,6 @@
+#ifndef KEYBOARD_CONTROLLER
+#define KEYBOARD_CONTROLLER
+
 #include <Arduino.h>
 
 class KeyboardController {
@@ -15,3 +18,4 @@ class KeyboardController {
     bool getKeyStatus(int key);
     bool getKeyClick(int key);
 };
+#endif
