@@ -19,9 +19,31 @@ void BPMController::handleKeyboard(KeyboardController *kc) {
   if (kc->getKeyClick(10)) bpm=140.f;
   if (kc->getKeyClick(11)) bpm=200.f;
   this->clampBPM();
+
+  repeat=0;
+  if (kc->getKeyStatus(12)) repeat=8;
+  if (kc->getKeyStatus(13)) repeat=16;
+  if (kc->getKeyStatus(14)) repeat=32;
+  if (kc->getKeyStatus(15)) repeat=64;
 }
 
 float BPMController::getBPM() {
   clampBPM();
   return bpm;
+}
+
+int BPMController::getRepeat() {
+  return repeat;
+}
+
+int BPMController::getStep() {
+  return micron/8;
+}
+
+int BPMController::getMicron() {
+  return micron;
+}
+
+void BPMController::setMicron(int step){
+  micron=step;
 }

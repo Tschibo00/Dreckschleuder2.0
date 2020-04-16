@@ -5,6 +5,7 @@ StateController::StateController() {
 }
 
 void StateController::setCurrentState(KeyboardController *kc) {
+  currentState=IDLE;
   if (kc->getKeyStatus(17)) currentState=SET_BPM;
   if (kc->getKeyStatus(20)) currentState=PATTERN;
 }

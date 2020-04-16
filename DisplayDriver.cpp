@@ -8,6 +8,10 @@
 DisplayDriver::DisplayDriver() {
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(15);
+  clear();
+}
+
+void DisplayDriver::clear() {
   for (char i=0; i<NUM_LEDS; i++)
     leds[i]=CRGB(0,0,0);
 }
@@ -39,4 +43,13 @@ void DisplayDriver::drawDigit(char i, char pos, CRGB color) {
     leds[pos+j]=(i&1==1)?color:CRGB(0,0,0);
     i=i>>1;
   }
+}
+
+void DisplayDriver::fill(char first, char last, CRGB color) {
+  for (char i=first; i<=last; i++)
+    leds[i]=color;
+}
+
+void DisplayDriver::set(char pos, CRGB color) {
+  leds[pos]=color;
 }
