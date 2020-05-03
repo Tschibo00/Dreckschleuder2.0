@@ -5,26 +5,11 @@
 
 class PatternController {
   private:
-    uint8_t currentPattern[16]={
-      0b11100000,
-      0b10001001,
-      0b10000110,
-      0b10000000,
-      0b11111001,
-      0b10001000,
-      0b10000110,
-      0b10000001,
-      0b11101000,
-      0b10001000,
-      0b10000111,
-      0b10000000,
-      0b11111000,
-      0b10001011,
-      0b10000100,
-      0b10000010
-    };
+    uint8_t currentPattern[32];    // first 16 steps are the triggers with accent, step 16-31 are the trigger without accent
 
   public:
-    uint8_t getTriggers(uint8_t pos);
+    uint8_t getTriggers(uint8_t pos, bool accent);
+    void setTrigger(uint8_t pos, bool accent, uint8_t instrument); // 0=bdr,1=snr,2=clp,3=ch,4=oh,5=ride,6=crash
+    void clearTrigger(uint8_t pos, uint8_t instrument);
 };
 #endif

@@ -47,19 +47,26 @@ void setup() {
 }
 
 ISR(TIMER1_COMPA_vect){
-  if (bc->isRunning){
+  if (bc->runningState!=bc->STOP){
     bc->advance();
-    if (bc->getTrigger(true)){
-      uint8_t triggers=pc->getTriggers(bc->getPos());
+    if (bc->getTrigger(true)){        // first trigger all accented drums
+      uint8_t triggers=pc->getTriggers(bc->getPos(), true);
       PORTB=PORTB&0b11111110|((triggers&64)>>6);
       PORTC=triggers;
-      PORTD=PORTD&0b01111111|(triggers&128);
-    } else {
+      PORTD=PORTD&0b01111111|0b10000000;
+    }
+    if (bc->getTrigger(false)){       // then trigger all not accented drums
+      uint8_t triggers=pc->getTriggers(bc->getPos(), false);
+      PORTB=PORTB&0b11111110|((triggers&64)>>6);
+      PORTC=triggers;
+      PORTD=PORTD&0b01111111;
+    }
+    if (!bc->getTrigger(true)&&!bc->getTrigger(false)){   // and if all is done, set trigger outs back to 0
       PORTB=PORTB&0b11111110;
       PORTC=0;
       PORTD=PORTD&0b01111111;
     }
-  } else {
+  } else {                            // not running => nothing to play
     bc->reset();
     PORTB=PORTB&0b11111110;
     PORTC=0;
@@ -72,11 +79,36 @@ void loop() {
  
   kc->scanKeyboard();
 
-  if (kc->getKeyClick(23))
-    bc->isRunning=!bc->isRunning;
+  if (kc->getKeyClick(23)){
+    if (kc->getKeyStatus(22)){
+      if (bc->runningState==bc->REC)
+        bc->runningState=bc->STOP;
+      else
+        bc->runningState=bc->REC;
+    } else {
+      if (bc->runningState==bc->PLAY)
+        bc->runningState=bc->STOP;
+      else
+        bc->runningState=bc->PLAY;
+    }
+  }
 
-  if (bc->getPos()%4==0)
-    dd->set(23,CRGB::Green);
+  if (bc->runningState==bc->REC){
+    for (uint8_t k=0;k<7;k++){
+      if (kc->getKeyStatus(22)){
+        if (kc->getKeyStatus(k*2)||kc->getKeyStatus(k*2+1))
+          pc->clearTrigger(bc->getPos(), k);
+      } else {
+        if (kc->getKeyClick(k*2)) pc->setTrigger(bc->getPos(), false, k);
+        if (kc->getKeyClick(k*2+1)) pc->setTrigger(bc->getPos(), true, k);
+      }
+    }
+  }
+
+  if (bc->getPos()%4==0){
+    if (bc->runningState==bc->PLAY) dd->set(23,CRGB::Green);
+    if (bc->runningState==bc->REC) dd->set(23,CRGB::Red);
+  }
   dd->set(bc->getOriginalPos(),CRGB::Red);
 
   sc->setCurrentState(kc);
@@ -92,9 +124,9 @@ void loop() {
       bc->handleKeyboard(kc);
       dd->set(bc->getPos(),CRGB::Purple);
       break;
-      default:
-        bc->resetRepeat();
-        break;
+    default:
+      bc->resetRepeat();
+      break;
   }
 
   dd->show();

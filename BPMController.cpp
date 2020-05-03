@@ -49,6 +49,9 @@ void BPMController::advance(){
   currentMicron+=incPerStep;
   if (currentMicron>=64.f)
     currentMicron-=64.f;
+  triggerState--;
+  if (triggerState<0) triggerState=0;
+  if (lastMicron!=getMicron()&&(getMicron()%repeatStep==0)) triggerState=2;
 }
 
 void BPMController::reset(){
@@ -62,5 +65,5 @@ void BPMController::resetRepeat(){
 }
 
 bool BPMController::getTrigger(bool accent){
-  return (lastMicron!=getMicron()&&(getMicron()%repeatStep==0));
+  return ((accent&&triggerState==2)||(!accent&&triggerState==1));
 }

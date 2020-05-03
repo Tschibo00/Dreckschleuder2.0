@@ -5,7 +5,7 @@ class StateController {
     char currentState;
 
   public:
-    enum STATE{IDLE, PLAY, REC, SET_BPM, SET_REPEAT, PATTERN};
+    enum STATE{IDLE, SET_BPM, SET_REPEAT, PATTERN};
 
     StateController();
     void setCurrentState(KeyboardController *kc);

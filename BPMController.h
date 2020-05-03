@@ -9,11 +9,14 @@ class BPMController {
     uint8_t repeatPattern=16;
     uint8_t repeatStep=4;
     uint8_t repeatStart=0;
+    int8_t triggerState=0;     // 0=no trigger, 2=accent trigger, 1=no accent triggers
 
     void clampBPM();
 
   public:
-    bool isRunning=false;
+    enum STATE{STOP, PLAY, REC};
+
+    char runningState=STOP;
     bool repeatPressed;
     void handleKeyboard(KeyboardController *kc);
     float getBPM();
