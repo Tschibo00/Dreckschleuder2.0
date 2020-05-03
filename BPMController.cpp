@@ -1,8 +1,9 @@
 #include "BPMController.h"
 
 void BPMController::clampBPM() {
-  if (bpm<0.f) bpm=0.f;
-  if (bpm>999.f) bpm=999.f;
+  if (bpm<.1f) bpm=.1f;
+  if (bpm>999.9f) bpm=999.9f;
+  incPerStep=bpm/3750.f;  // increase per 1/1000th sec for 1/64 steps
 }
 
 void BPMController::handleKeyboard(KeyboardController *kc) {
@@ -20,11 +21,10 @@ void BPMController::handleKeyboard(KeyboardController *kc) {
   if (kc->getKeyClick(11)) bpm=200.f;
   this->clampBPM();
 
-  repeat=0;
-  if (kc->getKeyStatus(12)) repeat=8;
-  if (kc->getKeyStatus(13)) repeat=16;
-  if (kc->getKeyStatus(14)) repeat=32;
-  if (kc->getKeyStatus(15)) repeat=64;
+  if (kc->getKeyClick(12)||kc->getKeyClick(13)) repeatStart=getPos();
+  if (kc->getKeyStatus(13)) repeatPattern=1; else {if (kc->getKeyStatus(12)) repeatPattern=2; else {repeatPattern=16;repeatStart=0;}}
+  if (kc->getKeyStatus(15)) repeatStep=1; else {if (kc->getKeyStatus(14)) repeatStep=2; else repeatStep=4;}
+  repeatPressed=kc->getKeyStatus(12)|kc->getKeyStatus(13)|kc->getKeyStatus(14)|kc->getKeyStatus(15);
 }
 
 float BPMController::getBPM() {
@@ -32,18 +32,35 @@ float BPMController::getBPM() {
   return bpm;
 }
 
-int BPMController::getRepeat() {
-  return repeat;
+uint8_t BPMController::getMicron() {
+  return (uint8_t)currentMicron;
 }
 
-int BPMController::getStep() {
-  return micron/8;
+uint8_t BPMController::getPos(){
+  return (((uint8_t)(currentMicron/4.f))%repeatPattern+repeatStart)%16;
 }
 
-int BPMController::getMicron() {
-  return micron;
+uint8_t BPMController::getOriginalPos(){
+  return ((uint8_t)(currentMicron/4.f));
 }
 
-void BPMController::setMicron(int step){
-  micron=step;
+void BPMController::advance(){
+  lastMicron=getMicron();
+  currentMicron+=incPerStep;
+  if (currentMicron>=64.f)
+    currentMicron-=64.f;
+}
+
+void BPMController::reset(){
+  currentMicron=0.f;
+  lastMicron=255;
+}
+
+void BPMController::resetRepeat(){
+  repeatPattern=16;
+  repeatStep=4;
+}
+
+bool BPMController::getTrigger(bool accent){
+  return (lastMicron!=getMicron()&&(getMicron()%repeatStep==0));
 }
