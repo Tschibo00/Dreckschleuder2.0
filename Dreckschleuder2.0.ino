@@ -46,32 +46,29 @@ void setup() {
 //  Serial.begin(115200);
 }
 
+bool isAccentTrigger=true;
 ISR(TIMER1_COMPA_vect){
   if (bc->runningState!=bc->STOP){
     bc->advance();
-    if (bc->getTrigger(true)){        // first trigger all accented drums
-      uint8_t triggers=pc->getTriggers(bc->getPos(), true);
+    if (bc->getTrigger()){
+      uint8_t triggers=pc->getTriggers(bc->getPos(), isAccentTrigger);
       PORTB=PORTB&0b11111110|((triggers&64)>>6);
       PORTC=triggers;
-      PORTD=PORTD&0b01111111|0b10000000;
+      PORTD=PORTD&0b01111111|(isAccentTrigger<<7);
     }
-    if (bc->getTrigger(false)){       // then trigger all not accented drums
-      uint8_t triggers=pc->getTriggers(bc->getPos(), false);
-      PORTB=PORTB&0b11111110|((triggers&64)>>6);
-      PORTC=triggers;
-      PORTD=PORTD&0b01111111;
-    }
-    if (!bc->getTrigger(true)&&!bc->getTrigger(false)){   // and if all is done, set trigger outs back to 0
-      PORTB=PORTB&0b11111110;
-      PORTC=0;
-      PORTD=PORTD&0b01111111;
-    }
-  } else {                            // not running => nothing to play
+  } else {
     bc->reset();
-    PORTB=PORTB&0b11111110;
-    PORTC=0;
-    PORTD=PORTD&0b01111111;
   }
+  if (bc->runningState==bc->STOP||!bc->getTrigger()){
+    uint8_t manualTriggers=0;
+    if (bc->runningState!=bc->REC)
+      for (uint8_t k=0;k<7;k++)
+        if (kc->getKeyClick(k*2+isAccentTrigger)) manualTriggers|=1<<(6-k);
+    PORTB=PORTB&0b11111110|((manualTriggers&64)>>6);
+    PORTC=manualTriggers;
+    PORTD=PORTD&0b01111111|(isAccentTrigger<<7);
+  }
+  isAccentTrigger=!isAccentTrigger;
 }
 
 void loop() {
@@ -99,8 +96,8 @@ void loop() {
         if (kc->getKeyStatus(k*2)||kc->getKeyStatus(k*2+1))
           pc->clearTrigger(bc->getPos(), k);
       } else {
-        if (kc->getKeyClick(k*2)) pc->setTrigger(bc->getPos(), false, k);
-        if (kc->getKeyClick(k*2+1)) pc->setTrigger(bc->getPos(), true, k);
+        if (kc->getKeyClick(k*2)) pc->setTrigger(((bc->getMicron()+1)%64)/4, false, k);
+        if (kc->getKeyClick(k*2+1)) pc->setTrigger(((bc->getMicron()+1)%64)/4, true, k);
       }
     }
   }

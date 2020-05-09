@@ -64,6 +64,6 @@ void BPMController::resetRepeat(){
   repeatStep=4;
 }
 
-bool BPMController::getTrigger(bool accent){
-  return ((accent&&triggerState==2)||(!accent&&triggerState==1));
+bool BPMController::getTrigger(){
+  return triggerState>0;
 }

@@ -21,7 +21,7 @@ class BPMController {
     void handleKeyboard(KeyboardController *kc);
     float getBPM();
 
-    bool getTrigger(bool accent);
+    bool getTrigger();
     uint8_t getMicron();
     uint8_t getPos();
     uint8_t getOriginalPos();
