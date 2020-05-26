@@ -61,7 +61,7 @@ ISR(TIMER1_COMPA_vect){
   }
   if (bc->runningState==bc->STOP||!bc->getTrigger()){
     uint8_t manualTriggers=0;
-    if (bc->runningState!=bc->REC)
+    if ((bc->runningState!=bc->REC)&&(sc->getSelectedInstrument()==-1))
       for (uint8_t k=0;k<7;k++)
         if (kc->getKeyClick(k*2+isAccentTrigger)) manualTriggers|=1<<(6-k);
     PORTB=PORTB&0b11111110|((manualTriggers&64)>>6);
@@ -76,8 +76,8 @@ void loop() {
  
   kc->scanKeyboard();
 
-  if (kc->getKeyClick(23)){
-    if (kc->getKeyStatus(22)){
+  if (kc->getKeyClick(kc->PLAY)){
+    if (kc->getKeyStatus(kc->SHIFT)){
       if (bc->runningState==bc->REC)
         bc->runningState=bc->STOP;
       else
@@ -90,9 +90,9 @@ void loop() {
     }
   }
 
-  if (bc->runningState==bc->REC){
+  if ((bc->runningState==bc->REC)&&(sc->getSelectedInstrument()==-1)){
     for (uint8_t k=0;k<7;k++){
-      if (kc->getKeyStatus(22)){
+      if (kc->getKeyStatus(kc->SHIFT)){
         if (kc->getKeyStatus(k*2)||kc->getKeyStatus(k*2+1))
           pc->clearTrigger(bc->getPos(), k);
       } else {
@@ -103,12 +103,37 @@ void loop() {
   }
 
   if (bc->getPos()%4==0){
-    if (bc->runningState==bc->PLAY) dd->set(23,CRGB::Green);
-    if (bc->runningState==bc->REC) dd->set(23,CRGB::Red);
+    if (bc->runningState==bc->PLAY) dd->set(kc->PLAY,CRGB::Green);
+    if (bc->runningState==bc->REC) dd->set(kc->PLAY,CRGB::Red);
   }
-  dd->set(bc->getOriginalPos(),CRGB::Red);
+  dd->set(bc->getOriginalPos(),CRGB::Green);
 
   sc->setCurrentState(kc);
+  sc->setSelectedInstrument(kc);
+  if (sc->getSelectedInstrument()!=-1){
+//    dd->add(sc->getSelectedInstrument()*2,CRGB::Blue);
+//    dd->add(sc->getSelectedInstrument()*2+1,CRGB::Blue);
+    dd->set(kc->INSTRUMENT,CRGB::Red);
+    for (char i=0;i<16;i++){
+      if (!kc->getKeyStatus(kc->INSTRUMENT)){
+        if (kc->getKeyClick(i)){
+          if (pc->getTriggers(i,true)&(1<<(6-sc->getSelectedInstrument()))){
+            pc->setTrigger(i,false,sc->getSelectedInstrument());
+          } else
+            if (pc->getTriggers(i,false)&(1<<(6-sc->getSelectedInstrument())))
+              pc->clearTrigger(i,sc->getSelectedInstrument());
+            else
+              pc->setTrigger(i,true,sc->getSelectedInstrument());
+        }
+      }
+      if (pc->getTriggers(i,true)&(1<<(6-sc->getSelectedInstrument())))
+        dd->add(i,CRGB::Orange);
+      if (pc->getTriggers(i,false)&(1<<(6-sc->getSelectedInstrument())))
+        dd->add(i,CRGB::Red);
+    }
+  } else {
+    dd->set(kc->INSTRUMENT,CRGB::Black);
+  }
 
   switch(sc->getCurrentState()){
     case sc->SET_BPM:

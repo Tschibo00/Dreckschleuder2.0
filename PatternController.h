@@ -5,7 +5,7 @@
 
 class PatternController {
   private:
-    uint8_t currentPattern[32];    // first 16 steps are the triggers with accent, step 16-31 are the trigger without accent
+    uint8_t currentPattern[32]={64,0,0,0,64,0,0,0,64,0,0,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};    // first 16 steps are the triggers with accent, step 16-31 are the trigger without accent
 
   public:
     uint8_t getTriggers(uint8_t pos, bool accent);

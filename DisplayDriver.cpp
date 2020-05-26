@@ -53,3 +53,7 @@ void DisplayDriver::fill(char first, char last, CRGB color) {
 void DisplayDriver::set(char pos, CRGB color) {
   leds[pos]=color;
 }
+
+void DisplayDriver::add(char pos, CRGB color) {
+  leds[pos]+=color;
+}

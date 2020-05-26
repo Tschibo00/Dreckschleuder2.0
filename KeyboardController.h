@@ -13,6 +13,8 @@ class KeyboardController {
     bool myDigitalRead(int pin);
 
   public:
+    enum KEY{A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,RESERVED,TEMPO,COPY,FILLIN,PATTERN,INSTRUMENT,SHIFT,PLAY};
+  
     KeyboardController();
     void scanKeyboard();
     bool getKeyStatus(int key);

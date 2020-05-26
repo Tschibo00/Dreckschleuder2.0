@@ -16,4 +16,5 @@ class DisplayDriver {
     void drawNumber(float f, char pos, CRGB color);
     void fill(char first, char last, CRGB color);
     void set(char pos, CRGB color);
+    void add(char pos, CRGB color);
 };
