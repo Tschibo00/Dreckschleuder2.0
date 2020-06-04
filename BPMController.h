@@ -1,3 +1,6 @@
+#ifndef BPM_CONTROLLER
+#define BPM_CONTROLLER
+
 #include "KeyboardController.h"
 
 class BPMController {
@@ -10,13 +13,20 @@ class BPMController {
     uint8_t repeatStep=4;
     uint8_t repeatStart=0;
     int8_t triggerState=0;     // 0=no trigger, 2=accent trigger, 1=no accent triggers
+    int8_t shuffle=0;
+    uint8_t sync=NO;
+    bool blockSync=false;
+    uint8_t runningState=STOP;
 
     void clampBPM();
 
   public:
     enum STATE{STOP, PLAY, REC};
+    enum SYNC{NO,S8,S16,S24,S48};
 
-    char runningState=STOP;
+    void setState(uint8_t state);
+    uint8_t getState();
+
     bool repeatPressed;
     void handleKeyboard(KeyboardController *kc);
     float getBPM();
@@ -26,8 +36,13 @@ class BPMController {
     uint8_t getPos();
     uint8_t getOriginalPos();
 
+    int8_t getShuffle();
+    uint8_t getSync();
+
     void reset();
     void resetRepeat();
 
     void advance();
 };
+
+#endif

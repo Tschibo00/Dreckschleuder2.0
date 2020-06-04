@@ -12,8 +12,7 @@ DisplayDriver::DisplayDriver() {
 }
 
 void DisplayDriver::clear() {
-  for (char i=0; i<NUM_LEDS; i++)
-    leds[i]=CRGB(0,0,0);
+  fill(0,15,CRGB::Black);
 }
 
 void DisplayDriver::show() {
@@ -43,6 +42,12 @@ void DisplayDriver::drawDigit(char i, char pos, CRGB color) {
     leds[pos+j]=(i&1==1)?color:CRGB(0,0,0);
     i=i>>1;
   }
+}
+
+void DisplayDriver::drawShuffle(uint8_t shuffle, uint8_t sync){
+  leds[shuffle+4]=CRGB::Pink;
+  if (sync!=0)
+    leds[sync+9]=CRGB::Aqua;
 }
 
 void DisplayDriver::fill(char first, char last, CRGB color) {

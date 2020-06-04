@@ -48,7 +48,7 @@ void setup() {
 
 bool isAccentTrigger=true;
 ISR(TIMER1_COMPA_vect){
-  if (bc->runningState!=bc->STOP){
+  if (bc->getState()!=bc->STOP){
     bc->advance();
     if (bc->getTrigger()){
       uint8_t triggers=pc->getTriggers(bc->getPos(), isAccentTrigger);
@@ -59,9 +59,9 @@ ISR(TIMER1_COMPA_vect){
   } else {
     bc->reset();
   }
-  if (bc->runningState==bc->STOP||!bc->getTrigger()){
+  if (bc->getState()==bc->STOP||!bc->getTrigger()){
     uint8_t manualTriggers=0;
-    if ((bc->runningState!=bc->REC)&&(sc->getSelectedInstrument()==-1))
+    if ((bc->getState()!=bc->REC)&&(sc->getSelectedInstrument()==-1))
       for (uint8_t k=0;k<7;k++)
         if (kc->getKeyClick(k*2+isAccentTrigger)) manualTriggers|=1<<(6-k);
     PORTB=PORTB&0b11111110|((manualTriggers&64)>>6);
@@ -75,22 +75,9 @@ void loop() {
   dd->clear();
  
   kc->scanKeyboard();
+  sc->setCurrentState(kc,bc);
 
-  if (kc->getKeyClick(kc->PLAY)){
-    if (kc->getKeyStatus(kc->SHIFT)){
-      if (bc->runningState==bc->REC)
-        bc->runningState=bc->STOP;
-      else
-        bc->runningState=bc->REC;
-    } else {
-      if (bc->runningState==bc->PLAY)
-        bc->runningState=bc->STOP;
-      else
-        bc->runningState=bc->PLAY;
-    }
-  }
-
-  if ((bc->runningState==bc->REC)&&(sc->getSelectedInstrument()==-1)){
+  if ((bc->getState()==bc->REC)&&(sc->getSelectedInstrument()==-1)){
     for (uint8_t k=0;k<7;k++){
       if (kc->getKeyStatus(kc->SHIFT)){
         if (kc->getKeyStatus(k*2)||kc->getKeyStatus(k*2+1))
@@ -103,12 +90,11 @@ void loop() {
   }
 
   if (bc->getPos()%4==0){
-    if (bc->runningState==bc->PLAY) dd->set(kc->PLAY,CRGB::Green);
-    if (bc->runningState==bc->REC) dd->set(kc->PLAY,CRGB::Red);
+    if (bc->getState()==bc->PLAY) dd->set(kc->PLAY,CRGB::Green);
+    if (bc->getState()==bc->REC) dd->set(kc->PLAY,CRGB::Red);
   }
   dd->set(bc->getOriginalPos(),CRGB::Green);
 
-  sc->setCurrentState(kc);
   sc->setSelectedInstrument(kc);
   if (sc->getSelectedInstrument()!=-1){
 //    dd->add(sc->getSelectedInstrument()*2,CRGB::Blue);
@@ -117,13 +103,17 @@ void loop() {
     for (char i=0;i<16;i++){
       if (!kc->getKeyStatus(kc->INSTRUMENT)){
         if (kc->getKeyClick(i)){
-          if (pc->getTriggers(i,true)&(1<<(6-sc->getSelectedInstrument()))){
-            pc->setTrigger(i,false,sc->getSelectedInstrument());
-          } else
-            if (pc->getTriggers(i,false)&(1<<(6-sc->getSelectedInstrument())))
-              pc->clearTrigger(i,sc->getSelectedInstrument());
-            else
-              pc->setTrigger(i,true,sc->getSelectedInstrument());
+          if (kc->getKeyStatus(kc->SHIFT))
+            pc->clearTrigger(i,sc->getSelectedInstrument());
+          else {
+            if (pc->getTriggers(i,true)&(1<<(6-sc->getSelectedInstrument()))){
+              pc->setTrigger(i,false,sc->getSelectedInstrument());
+            } else
+              if (pc->getTriggers(i,false)&(1<<(6-sc->getSelectedInstrument())))
+                pc->clearTrigger(i,sc->getSelectedInstrument());
+              else
+                pc->setTrigger(i,true,sc->getSelectedInstrument());
+          }
         }
       }
       if (pc->getTriggers(i,true)&(1<<(6-sc->getSelectedInstrument())))
@@ -136,13 +126,17 @@ void loop() {
   }
 
   switch(sc->getCurrentState()){
-    case sc->SET_BPM:
+    case sc->BPM:
       bc->handleKeyboard(kc);
-      if (!bc->repeatPressed)
-        dd->drawNumber(bc->getBPM(), 0, CRGB(0, 255, 0));
-      else
-        dd->set(bc->getPos(),CRGB::Purple);
-    case sc->SET_REPEAT:
+      if (kc->getKeyStatus(kc->SHIFT)){
+        dd->drawShuffle(bc->getShuffle(), bc->getSync());
+      }else{
+        if (!bc->repeatPressed)
+          dd->drawNumber(bc->getBPM(), 0, CRGB(0, 255, 0));
+        else
+          dd->set(bc->getPos(),CRGB::Purple);
+      }
+    case sc->REPEAT:
       bc->handleKeyboard(kc);
       dd->set(bc->getPos(),CRGB::Purple);
       break;
