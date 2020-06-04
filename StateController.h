@@ -14,8 +14,8 @@ class StateController {
     enum STATE{IDLE, BPM, REPEAT, PATTERN, PREPATTERN, SONG, FILLIN, COPY, CLEAR, INSTRUMENT, RANDOMIZE};
 
     StateController();
-    void setCurrentState(KeyboardController *kc, BPMController *bc);
-    uint8_t getCurrentState();
+    void setState(KeyboardController *kc, BPMController *bc);
+    uint8_t getState();
     uint8_t getPlayingState();
     int8_t getSelectedInstrument();
     void setSelectedInstrument(KeyboardController *kc);

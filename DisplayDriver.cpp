@@ -12,7 +12,7 @@ DisplayDriver::DisplayDriver() {
 }
 
 void DisplayDriver::clear() {
-  fill(0,15,CRGB::Black);
+  fill(0,23,CRGB::Black);
 }
 
 void DisplayDriver::show() {

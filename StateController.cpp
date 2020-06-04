@@ -4,7 +4,7 @@ StateController::StateController() {
   currentState = IDLE;
 }
 
-void StateController::setCurrentState(KeyboardController *kc, BPMController *bc) {
+void StateController::setState(KeyboardController *kc, BPMController *bc) {
   if (kc->getKeyClick(kc->PLAY)) {
     if (kc->getKeyStatus(kc->SHIFT)) {
       switch(bc->getState()){
@@ -41,7 +41,7 @@ void StateController::setCurrentState(KeyboardController *kc, BPMController *bc)
   }
 }
 
-uint8_t StateController::getCurrentState() {
+uint8_t StateController::getState() {
   return currentState;
 }
 

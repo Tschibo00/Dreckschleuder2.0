@@ -18,3 +18,15 @@ void PatternController::clearTrigger(uint8_t pos, uint8_t instrument){
   currentPattern[pos]&=255^(1<<(6-instrument));
   currentPattern[pos+16]&=255^(1<<(6-instrument));
 }
+
+void PatternController::setPattern(uint8_t pattern){
+  selectedPattern=pattern;
+}
+
+uint8_t PatternController::getPattern(){
+  return selectedPattern;
+}
+
+void PatternController::loadPrePattern(uint8_t pattern){
+  
+}

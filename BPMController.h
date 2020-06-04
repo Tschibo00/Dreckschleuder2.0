@@ -6,7 +6,7 @@
 class BPMController {
   private:
     float bpm=130.f;
-    float incPerStep=0.f;
+    float incPerStep=130.f/3750.f;
     float currentMicron=0.f;    // 1/64th notes
     uint8_t lastMicron=255;
     uint8_t repeatPattern=16;

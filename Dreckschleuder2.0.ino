@@ -29,7 +29,7 @@ void setup() {
   pc=new PatternController();
 
   cli();//disable interrupts
-  //set timer1 interrupt at 10000Hz
+  //set timer1 interrupt at 1000Hz
   TCCR1A = 0;// set entire TCCR1A register to 0
   TCCR1B = 0;// same for TCCR1B
   TCNT1 = 0;//initialize counter value to 0
@@ -75,9 +75,9 @@ void loop() {
   dd->clear();
  
   kc->scanKeyboard();
-  sc->setCurrentState(kc,bc);
+  sc->setState(kc,bc);
 
-  if ((bc->getState()==bc->REC)&&(sc->getSelectedInstrument()==-1)){
+  if (sc->getState()==sc->IDLE&&bc->getState()==bc->REC&&sc->getSelectedInstrument()==-1){
     for (uint8_t k=0;k<7;k++){
       if (kc->getKeyStatus(kc->SHIFT)){
         if (kc->getKeyStatus(k*2)||kc->getKeyStatus(k*2+1))
@@ -93,12 +93,13 @@ void loop() {
     if (bc->getState()==bc->PLAY) dd->set(kc->PLAY,CRGB::Green);
     if (bc->getState()==bc->REC) dd->set(kc->PLAY,CRGB::Red);
   }
-  dd->set(bc->getOriginalPos(),CRGB::Green);
+  if (bc->getState()==bc->PLAY||bc->getState()==bc->REC)
+    dd->set(bc->getOriginalPos(),CRGB::Green);
 
   sc->setSelectedInstrument(kc);
   if (sc->getSelectedInstrument()!=-1){
-//    dd->add(sc->getSelectedInstrument()*2,CRGB::Blue);
-//    dd->add(sc->getSelectedInstrument()*2+1,CRGB::Blue);
+    dd->add(sc->getSelectedInstrument()*2,CRGB(0,0,24));
+    dd->add(sc->getSelectedInstrument()*2+1,CRGB(0,0,24));
     dd->set(kc->INSTRUMENT,CRGB::Red);
     for (char i=0;i<16;i++){
       if (!kc->getKeyStatus(kc->INSTRUMENT)){
@@ -125,7 +126,7 @@ void loop() {
     dd->set(kc->INSTRUMENT,CRGB::Black);
   }
 
-  switch(sc->getCurrentState()){
+  switch(sc->getState()){
     case sc->BPM:
       bc->handleKeyboard(kc);
       if (kc->getKeyStatus(kc->SHIFT)){
@@ -139,6 +140,26 @@ void loop() {
     case sc->REPEAT:
       bc->handleKeyboard(kc);
       dd->set(bc->getPos(),CRGB::Purple);
+      break;
+    case sc->PATTERN:
+      for (uint8_t k=0;k<16;k++)
+        if (kc->getKeyClick(k))
+          pc->setPattern(k);
+      break;
+    case sc->PREPATTERN:
+      for (uint8_t k=0;k<16;k++)
+        if (kc->getKeyClick(k))
+          pc->loadPrePattern(k);
+      break;
+    case sc->SONG:
+      break;
+    case sc->FILLIN:
+      break;
+    case sc->COPY:
+      break;
+    case sc->CLEAR:
+      break;
+    case sc->RANDOMIZE:
       break;
     default:
       bc->resetRepeat();
