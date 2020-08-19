@@ -27,6 +27,11 @@ uint8_t PatternController::getPattern(){
   return selectedPattern;
 }
 
-void PatternController::loadPrePattern(uint8_t pattern){
-  
+void PatternController::putPatternData(uint8_t **pattern){
+	for (int i=0;i<32;i++)
+		currentPattern[i]=pattern[i];
+}
+
+uint8_t** PatternController::getPatternData(){
+	return currentPattern;
 }

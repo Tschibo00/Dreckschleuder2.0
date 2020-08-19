@@ -14,6 +14,7 @@ class PatternController {
     void clearTrigger(uint8_t pos, uint8_t instrument);
     void setPattern(uint8_t pattern);
     uint8_t getPattern();
-    void loadPrePattern(uint8_t pattern);
+    void putPatternData(uint8_t **pattern);
+    uint8_t** getPatternData();
 };
 #endif

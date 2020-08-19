@@ -14,12 +14,14 @@
 #include "StateController.h"
 #include "BPMController.h"
 #include "PatternController.h"
+#include "MemoryContoller.h"
 
 KeyboardController *kc;
 DisplayDriver *dd;
 StateController *sc;
 BPMController *bc;
 PatternController *pc;
+MemoryController *mc;
 
 void setup() {
   kc=new KeyboardController();
@@ -27,6 +29,7 @@ void setup() {
   sc=new StateController();
   bc=new BPMController();
   pc=new PatternController();
+  mc=new MemoryController();
 
   cli();//disable interrupts
   //set timer1 interrupt at 1000Hz
@@ -143,8 +146,10 @@ void loop() {
       break;
     case sc->PATTERN:
       for (uint8_t k=0;k<16;k++)
-        if (kc->getKeyClick(k))
+        if (kc->getKeyClick(k)){
           pc->setPattern(k);
+          mc->readPattern()
+        }
       break;
     case sc->PREPATTERN:
       for (uint8_t k=0;k<16;k++)
